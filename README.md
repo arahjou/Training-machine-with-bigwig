@@ -1,4 +1,6 @@
-# Training-machine-with-bigwig
+# Training-machine-with-bigwig-data
+
+Next generation sequencing data
 
 A hepatocyte and a mature motor neuron in our body shares identical genetic information, but each of them executes different genetic programs.  This is possible, because of  the regulation of gene accessibility during and after organism development.
 
