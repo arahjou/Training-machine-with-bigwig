@@ -1,0 +1,604 @@
+---
+title: '20220119'
+author: "Ali Rahjoeui"
+date: "1/19/2022"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Is there any statistical correlation between epigenetic reads and writers occupancy and gene expression level in the future? 
+![Predicting future](/Users/arahjou/OneDrive/2021\ Projects/Rif1\ Project/PRC1.6\ ESCs\ mm10/Crystal\ ball.png)
+
+#loading library
+```{r loading library}
+library(tidyverse)
+library(ggpubr)
+
+```
+
+#loading data 
+```{r loading dataset}
+Mydata = read.csv(file = "20220131_MGA.csv", header = T)
+```
+
+
+## MGA occupancy from Rif1 prespective
+### Gene expression profile for genes that are occupied with both MGA and Rif1
+#### dotplot
+```{r}
+#Removing dataset
+dataset = Mydata
+#Removing genes with no RIF1 occupancy
+for (i in 2:3){
+  dataset = subset(dataset, dataset[i] != 0)}
+#Graph
+p0 = ggplot(dataset, aes(x=ESCs, y=MGA)) + geom_point()
+p1 = ggplot(dataset, aes(x=Ectoderm, y=MGA)) + geom_point()
+p2 =ggplot(dataset, aes(x=Mesoderm, y=MGA)) + geom_point()
+p3 = ggplot(dataset, aes(x=Endoderm, y=MGA)) + geom_point()
+p4 = ggplot(dataset, aes(x=EpiSCs, y=MGA)) + geom_point()
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+#### Density plot
+```{r}
+#Removing dataset
+dataset = Mydata
+#Removing genes with no RIf1 occupancy
+for (i in 2:3){
+  dataset = subset(dataset, dataset[i] != 0)}
+#Graph
+p0 = ggplot(dataset, aes(y=ESCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$ESCs), linetype="dashed", color = "red")
+p1 =ggplot(dataset, aes(y=EpiSCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$EpiSCs), linetype="dashed", color = "red")
+p2 = ggplot(dataset, aes(y=Ectoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Ectoderm), linetype="dashed", color = "red")
+p3 = ggplot(dataset, aes(y=Mesoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Mesoderm), linetype="dashed", color = "red")
+p4 = ggplot(dataset, aes(y=Endoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept=mean(dataset$Endoderm), linetype="dashed", color = "red")
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+
+#count number of up and down regulated genen
+
+```{r}
+
+#Removing dataset
+dataset = Mydata
+# Removing genes with RIF1 occupancy
+dataset = subset(dataset, dataset[3] == 0)
+#Graph
+p0 = ggplot(dataset, aes(x=ESCs, y=MGA)) + geom_point()
+p1 = ggplot(dataset, aes(x=Ectoderm, y=MGA)) + geom_point()
+p2 =ggplot(dataset, aes(x=Mesoderm, y=MGA)) + geom_point()
+p3 = ggplot(dataset, aes(x=Endoderm, y=MGA)) + geom_point()
+p4 = ggplot(dataset, aes(x=EpiSCs, y=MGA)) + geom_point()
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500)
+```
+#### Density plot
+```{r}
+#Removing dataset
+dataset = Mydata
+# Removing genes with RIF1 occupancy
+dataset = subset(dataset, dataset[3] == 0)
+#Graph
+p0 = ggplot(dataset, aes(y=ESCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$ESCs), linetype="dashed", color = "red")
+p1 =ggplot(dataset, aes(y=EpiSCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$EpiSCs), linetype="dashed", color = "red")
+p2 = ggplot(dataset, aes(y=Ectoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Ectoderm), linetype="dashed", color = "red")
+p3 = ggplot(dataset, aes(y=Mesoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Mesoderm), linetype="dashed", color = "red")
+p4 = ggplot(dataset, aes(y=Endoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept=mean(dataset$Endoderm), linetype="dashed", color = "red")
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+
+
+```{r}
+dataset = Mydata
+# Removing genes with zero RIF1 occupancy
+dataset = subset(dataset, dataset[3] != 0)
+dataset = dataset[c(2,3)]
+library(caTools)
+set.seed(123)
+split = sample.split(dataset$RIF1, SplitRatio = 0.75)
+training_set = subset(dataset, split == TRUE)
+test_set = subset(dataset, split == FALSE)
+
+# Feature Scaling
+training_set = as.data.frame(scale(training_set))
+test_set = as.data.frame(scale(test_set))
+
+# Fitting Simple Linear Regression to the Training set
+regressor = lm(formula = RIF1 ~ MGA,
+               data = training_set)
+summary(regressor)
+# Predicting the Test set results
+y_pred = predict(regressor, newdata = test_set)
+
+# Visualising the Training set results
+#library(ggplot2)
+p1 = ggplot() +
+  geom_point(aes(x = training_set$MGA, y = training_set$RIF1),
+             colour = 'red') +
+  geom_line(aes(x = training_set$MGA, y = predict(regressor, newdata = training_set)),
+            colour = 'blue') +
+  ggtitle('RIF1 vs MGA (Training set)') +
+  xlab('Counts of MGA') +
+  ylab('RIF1')
+
+# Visualising the Test set results
+#library(ggplot2)
+p2 = ggplot() +
+  geom_point(aes(x = test_set$MGA, y = test_set$RIF1),
+             colour = 'red') +
+  geom_line(aes(x = training_set$MGA, y = predict(regressor, newdata = training_set)),
+            colour = 'blue') +
+  ggtitle('RIF1 vs MGA (Test set)') +
+  xlab('Counts of MGA') +
+  ylab('RIF1')
+
+ggarrange(p1, p2 + rremove("x.text"), 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+```
+
+## MGA occupancy from PCGCF6 prespective
+### Gene expression profile for genes that are occupied with both MGA and PCGCF6
+#### dotplot
+```{r}
+#Removing dataset
+dataset = Mydata[c(1,2,5, 10, 11, 12, 13,14)]
+#Removing genes with no RIF1 occupancy
+for (i in 2:3){
+  dataset = subset(dataset, dataset[i] != 0)}
+
+# Removing genes with no PCGCF6 occupancy
+for (i in 2:3){
+  dataset = subset(dataset, dataset[i] != 0)}
+#Graph
+p0 = ggplot(dataset, aes(x=ESCs, y=MGA)) + geom_point()
+p1 = ggplot(dataset, aes(x=Ectoderm, y=MGA)) + geom_point()
+p2 =ggplot(dataset, aes(x=Mesoderm, y=MGA)) + geom_point()
+p3 = ggplot(dataset, aes(x=Endoderm, y=MGA)) + geom_point()
+p4 = ggplot(dataset, aes(x=EpiSCs, y=MGA)) + geom_point()
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+#### Density plot
+```{r}
+#Removing dataset
+dataset = Mydata[c(1,2,5, 10, 11, 12, 13,14)]
+
+#Removing genes with no PCGCF6 occupancy
+for (i in 2:3){
+  dataset = subset(dataset, dataset[i] != 0)}
+#Graph
+p0 = ggplot(dataset, aes(y=ESCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$ESCs), linetype="dashed", color = "red")
+p1 =ggplot(dataset, aes(y=EpiSCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$EpiSCs), linetype="dashed", color = "red")
+p2 = ggplot(dataset, aes(y=Ectoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Ectoderm), linetype="dashed", color = "red")
+p3 = ggplot(dataset, aes(y=Mesoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Mesoderm), linetype="dashed", color = "red")
+p4 = ggplot(dataset, aes(y=Endoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept=mean(dataset$Endoderm), linetype="dashed", color = "red")
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+
+
+
+
+```{r}
+dataset = dataset = Mydata[c(1,2,5)]
+# Removing genes with zero RIF1 occupancy
+dataset = subset(dataset, dataset[3] != 0)
+dataset = dataset[c(2,3)]
+library(caTools)
+set.seed(123)
+split = sample.split(dataset$PCGCF6, SplitRatio = 0.75)
+training_set = subset(dataset, split == TRUE)
+test_set = subset(dataset, split == FALSE)
+
+# Feature Scaling
+training_set = as.data.frame(scale(training_set))
+test_set = as.data.frame(scale(test_set))
+
+# Fitting Simple Linear Regression to the Training set
+regressor = lm(formula = PCGCF6 ~ MGA,
+               data = training_set)
+summary(regressor)
+# Predicting the Test set results
+y_pred = predict(regressor, newdata = test_set)
+
+# Visualising the Training set results
+#library(ggplot2)
+p1 = ggplot() +
+  geom_point(aes(x = training_set$MGA, y = training_set$PCGCF6),
+             colour = 'red') +
+  geom_line(aes(x = training_set$MGA, y = predict(regressor, newdata = training_set)),
+            colour = 'blue') +
+  ggtitle('PCGCF6 vs MGA (Training set)') +
+  xlab('Counts of MGA') +
+  ylab('PCGCF6')
+
+# Visualising the Test set results
+#library(ggplot2)
+p2 = ggplot() +
+  geom_point(aes(x = test_set$MGA, y = test_set$PCGCF6),
+             colour = 'red') +
+  geom_line(aes(x = training_set$MGA, y = predict(regressor, newdata = training_set)),
+            colour = 'blue') +
+  ggtitle('PCGCF6 vs MGA (Test set)') +
+  xlab('Counts of MGA') +
+  ylab('PCGCF6')
+
+ggarrange(p1, p2 + rremove("x.text"), 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+```
+
+## Genes that are occupied with MGA, PCGCF6 and not with RIF1
+### Dotplot
+```{r}
+#Removing dataset
+dataset = Mydata[c(1,2,3,5, 10, 11, 12, 13,14)]
+#Removing RIF1 occupied genes
+dataset = subset(dataset, dataset[3] == 0)
+#Removing RIF1 from dataframe
+dataset = dataset[c(1,2,4, 5, 6, 7, 8,9)]
+for (i in 2:3){
+  dataset = subset(dataset, dataset[i] != 0)}
+#Graph
+p0 = ggplot(dataset, aes(x=ESCs, y=MGA)) + geom_point()
+p1 = ggplot(dataset, aes(x=Ectoderm, y=MGA)) + geom_point()
+p2 =ggplot(dataset, aes(x=Mesoderm, y=MGA)) + geom_point()
+p3 = ggplot(dataset, aes(x=Endoderm, y=MGA)) + geom_point()
+p4 = ggplot(dataset, aes(x=EpiSCs, y=MGA)) + geom_point()
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+#### Density plot
+```{r}
+#Removing dataset
+dataset = Mydata[c(1,2,3,5, 10, 11, 12, 13,14)]
+#Removing RIF1 occupied genes
+dataset = subset(dataset, dataset[3] == 0)
+#Removing RIF1 from dataframe
+dataset = dataset[c(1,2,4, 5, 6, 7, 8,9)]
+for (i in 2:3){
+  dataset = subset(dataset, dataset[i] != 0)}
+#Graph
+p0 = ggplot(dataset, aes(y=ESCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$ESCs), linetype="dashed", color = "red")
+p1 =ggplot(dataset, aes(y=EpiSCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$EpiSCs), linetype="dashed", color = "red")
+p2 = ggplot(dataset, aes(y=Ectoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Ectoderm), linetype="dashed", color = "red")
+p3 = ggplot(dataset, aes(y=Mesoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Mesoderm), linetype="dashed", color = "red")
+p4 = ggplot(dataset, aes(y=Endoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept=mean(dataset$Endoderm), linetype="dashed", color = "red")
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+
+
+
+### Gene expression profile for genes that are occupied with Just MGA and no RIF1 and no CGCF6
+
+```{r}
+#Removing dataset
+dataset = Mydata[c(1,2,3,5, 10, 11, 12, 13,14)]
+#Removing RIF1 occupied genes
+dataset = subset(dataset, dataset[3] == 0)
+#Removing RIF1 from dataframe
+dataset = dataset[c(1,2,4, 5, 6, 7, 8,9)]
+#Removing genes with PCGCF6 occupancy
+dataset = subset(dataset, dataset[3] == 0)
+#Graph
+p0 = ggplot(dataset, aes(x=ESCs, y=MGA)) + geom_point()
+p1 = ggplot(dataset, aes(x=Ectoderm, y=MGA)) + geom_point()
+p2 =ggplot(dataset, aes(x=Mesoderm, y=MGA)) + geom_point()
+p3 = ggplot(dataset, aes(x=Endoderm, y=MGA)) + geom_point()
+p4 = ggplot(dataset, aes(x=EpiSCs, y=MGA)) + geom_point()
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500)
+```
+#### Density plot
+```{r}
+#Removing dataset
+dataset = Mydata[c(1,2,3,5, 10, 11, 12, 13, 14)]
+#Removing RIF1 occupied genes
+dataset = subset(dataset, dataset[3] == 0)
+#Removing RIF1 from dataframe
+dataset = dataset[c(1,2,4, 5, 6, 7, 8, 9)]
+#Removing genes with PCGCF6 occupancy
+dataset = subset(dataset, dataset[3] == 0)
+#Graph
+p0 = ggplot(dataset, aes(y=ESCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$ESCs), linetype="dashed", color = "red")
+p1 =ggplot(dataset, aes(y=EpiSCs)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$EpiSCs), linetype="dashed", color = "red")
+p2 = ggplot(dataset, aes(y=Ectoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Ectoderm), linetype="dashed", color = "red")
+p3 = ggplot(dataset, aes(y=Mesoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept= mean(dataset$Mesoderm), linetype="dashed", color = "red")
+p4 = ggplot(dataset, aes(y=Endoderm)) + geom_density(alpha=.2, fill="#FF6666") +
+  geom_hline(yintercept=mean(dataset$Endoderm), linetype="dashed", color = "red")
+
+ggarrange(p0, p1, p2, p3, p4 + rremove("x.text"), 
+          labels = c("A", "B", "C", "D", "E"),
+          ncol = 5, nrow = 1)
+# xlim(0,1500) 
+```
+
+```{r}
+#Removing dataset
+dataset = Mydata[c(1,2,3,5, 10, 11, 12, 13, 14)]
+#Removing RIF1 occupied genes
+dataset = subset(dataset, dataset[3] == 0)
+#Removing RIF1 from dataframe
+dataset = dataset[c(1,2,4, 5, 6, 7, 8, 9)]
+#Creating dataframe
+dataset = dataset[c(2,3)]
+#Removing zero value from PCGF6
+dataset = subset(dataset, PCGCF6 != 0)
+library(caTools)
+set.seed(123)
+split = sample.split(dataset$PCGCF6, SplitRatio = 0.75)
+training_set = subset(dataset, split == TRUE)
+test_set = subset(dataset, split == FALSE)
+
+# Feature Scaling
+training_set = as.data.frame(scale(training_set))
+test_set = as.data.frame(scale(test_set))
+
+# Fitting Simple Linear Regression to the Training set
+regressor = lm(formula = PCGCF6 ~ MGA,
+               data = training_set)
+summary(regressor)
+# Predicting the Test set results
+y_pred = predict(regressor, newdata = test_set)
+
+# Visualising the Training set results
+#library(ggplot2)
+p1 = ggplot() +
+  geom_point(aes(x = training_set$MGA, y = training_set$PCGCF6),
+             colour = 'red') +
+  geom_line(aes(x = training_set$MGA, y = predict(regressor, newdata = training_set)),
+            colour = 'blue') +
+  ggtitle('PCGCF6 vs MGA (Training set)') +
+  xlab('Counts of MGA') +
+  ylab('PCGCF6')
+
+# Visualising the Test set results
+#library(ggplot2)
+p2 = ggplot() +
+  geom_point(aes(x = test_set$MGA, y = test_set$PCGCF6),
+             colour = 'red') +
+  geom_line(aes(x = training_set$MGA, y = predict(regressor, newdata = training_set)),
+            colour = 'blue') +
+  ggtitle('PCGCF6 vs MGA (Test set)') +
+  xlab('Counts of MGA') +
+  ylab('PCGCF6')
+
+ggarrange(p1, p2 + rremove("x.text"), 
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+
+```
+# Modeling expression data
+## Regression
+### All vs All view
+#### ESCs
+```{r}
+dataset = Mydata
+
+#Removing genes with no RIF1 occupancy
+for (i in 2:4){
+  dataset = subset(dataset, dataset[i] != 0)}
+
+dataset = dataset[c(2,3,4,5,6,7, 8, 10)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+
+```
+
+#### Mesoderm
+```{r}
+dataset = Mydata
+dataset = dataset[c(2,3,4,5,6,7, 8, 11)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+
+```
+
+#### Ectoderm
+```{r}
+dataset = Mydata
+dataset = dataset[c(2,3,4,5,6,7, 8, 12)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+
+```
+
+#### EpiSCs
+```{r}
+dataset = Mydata
+dataset = dataset[c(2,3,4,5,6,7, 8, 13)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+
+```
+
+#### Endoderm
+```{r}
+dataset = Mydata
+dataset = dataset[c(2,3,4,5,6,7, 8, 14)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+
+```
+
+
+
+
+### Removing Rif1 zero regions
+#### ESCs with all members
+```{r}
+dataset = Mydata
+dataset <- dataset %>% filter(RIF1 != 0)
+dataset = dataset[c(2,3,4,5,6,7, 8, 10)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+```
+
+### Removing Rif1 zero regions
+#### Mesoderm with all members
+```{r}
+dataset = Mydata
+dataset <- dataset %>% filter(RIF1 != 0)
+dataset = dataset[c(2,3,4,5,6,7, 8, 11)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+```
+
+### Removing Rif1 zero regions
+#### Ectoderm with all members
+```{r}
+dataset = Mydata
+dataset <- dataset %>% filter(RIF1 != 0)
+dataset = dataset[c(2,3,4,5,6,7, 8, 12)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+```
+
+### Removing Rif1 zero regions
+#### Endoderm with all members
+```{r}
+dataset = Mydata
+dataset <- dataset %>% filter(RIF1 != 0)
+dataset = dataset[c(2,3,4,5,6,7, 8, 14)]
+colnames(dataset) = c("MGA", "RIF1", "L3MBTL2", "PCGCF6", "RNF2", "MAX", "MYC", "Expression")
+
+#Scaling the dataset
+for (i in 1:8){
+  dataset[i] = scale(dataset[i])}
+
+# Fitting Multiple Linear Regression to the Training set
+regressor = lm(formula = Expression ~ .,
+               data = dataset)
+summary(regressor)
+```
+
+
+
